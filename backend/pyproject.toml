@@ -80,3 +80,6 @@ error-on-warning = true
 
 [tool.fastapi]
 entrypoint = "app.main:app"
+
+[tool.vercel.scripts]
+build = "python -m app.init_db"

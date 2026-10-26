@@ -6,7 +6,9 @@ import { defineConfig } from "vite"
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    outDir: "../backend/app/frontend",
+    // Docker bundles the frontend into FastAPI's static directory. Vercel
+    // deploys the Vite output as its own service instead.
+    outDir: process.env.VERCEL === "1" ? "dist" : "../backend/app/frontend",
     emptyOutDir: true,
   },
   resolve: {
