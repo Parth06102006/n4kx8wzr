@@ -38,8 +38,7 @@ def apply_migrations() -> None:
         command.upgrade(alembic_config, "head")
     except OperationalError as exc:
         logger.error(
-            "Could not connect to database at %s. Please ensure PostgreSQL is running.",
-            settings.DATABASE_URL,
+            "Could not connect to the configured database. Verify its connection settings and availability.",
         )
         raise exc
 
@@ -194,8 +193,7 @@ def main() -> None:
             engine.dispose()
         except OperationalError:
             logger.warning(
-                "Database is currently offline/unreachable at %s. Skipping DB live count check.",
-                settings.DATABASE_URL,
+                "Configured database is currently unreachable. Skipping DB live count check.",
             )
         return
 

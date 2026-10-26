@@ -107,7 +107,9 @@ def main() -> None:
         logger.info("Duplicate Forecasts:   %s", report["duplicate_forecast_keys"])
         logger.info("Status:                %s", report["status"])
     except OperationalError:
-        logger.error("Could not connect to database at %s. Please ensure PostgreSQL is running.", settings.DATABASE_URL)
+        logger.error(
+            "Could not connect to the configured database. Verify its connection settings and availability."
+        )
         sys.exit(1)
 
 
