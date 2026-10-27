@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14, <4.0"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -69,11 +69,8 @@ version = "0.1.0"
 source = { editable = "backend" }
 dependencies = [
     { name = "alembic" },
-    { name = "email-validator" },
-    { name = "emails" },
     { name = "fastapi", extra = ["standard"] },
     { name = "httpx" },
-    { name = "jinja2" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pwdlib", extra = ["argon2", "bcrypt"] },
     { name = "pydantic" },
@@ -96,11 +93,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.19.1,<2.0.0" },
-    { name = "email-validator", specifier = ">=2.1.0.post1,<3.0.0.0" },
-    { name = "emails", specifier = ">=1.1.2,<2.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.141.1,<1.0.0" },
     { name = "httpx", specifier = ">=0.25.1,<1.0.0" },
-    { name = "jinja2", specifier = ">=3.1.4,<4.0.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6,<4.0.0" },
     { name = "pwdlib", extras = ["argon2", "bcrypt"], specifier = ">=0.3.1" },
     { name = "pydantic", specifier = ">=2.13.5" },
@@ -420,15 +414,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dkimpy"
-version = "1.1.8"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dnspython" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/6f/84e91828186bbfcedd7f9385ef5e0d369632444195c20e08951b7ffe0481/dkimpy-1.1.8.tar.gz", hash = "sha256:b5f60fb47bbf5d8d762f134bcea0c388eba6b498342a682a21f1686545094b77", size = 66979, upload-time = "2024-07-04T22:16:38.321Z" }
-
-[[package]]
 name = "dnspython"
 version = "2.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -448,20 +433,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f5/22/900cb125c76b7aaa450ce02fd727f452243f2e91a61af068b40adba60ea9/email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426", size = 51238, upload-time = "2025-08-26T13:09:06.831Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/15/545e2b6cf2e3be84bc1ed85613edd75b8aea69807a71c26f4ca6a9258e82/email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4", size = 35604, upload-time = "2025-08-26T13:09:05.858Z" },
-]
-
-[[package]]
-name = "emails"
-version = "1.1.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "dkimpy" },
-    { name = "puremagic" },
-    { name = "python-dateutil" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/25/bb/073e0244a4da617a1e7add93779e3a40ec173a36ff81b396450d73313f33/emails-1.1.2.tar.gz", hash = "sha256:9fd216b691704b3df9ad70073fc85945ba4e8eac80198233919cfa2488af8665", size = 37156, upload-time = "2026-05-18T13:26:29.958Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/7a/d64aea2f1bd6838fed3131460394c0d9d67c016a3fa1b45ef861a83310bc/emails-1.1.2-py3-none-any.whl", hash = "sha256:0ab991876921eeac13039d5be93192ab27da1600afa7d7ea6d51dfa7cd006eda", size = 42920, upload-time = "2026-05-18T13:26:28.702Z" },
 ]
 
 [[package]]
@@ -975,15 +946,6 @@ wheels = [
 ]
 
 [[package]]
-name = "puremagic"
-version = "2.2.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/24/74/ce5987ab9b8aec4ced06e2723ebb604205c9eb58abdad91453da93166380/puremagic-2.2.0.tar.gz", hash = "sha256:eb4bddf07c177c4b434554b92165b67449f5a51e152b976202d6254498810eef", size = 1189752, upload-time = "2026-04-08T01:39:55.562Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/95/81/314320aeffd88dadeac553ff9eb10f54507ab41deccd0c69f6221d254a0a/puremagic-2.2.0-py3-none-any.whl", hash = "sha256:c4f7ed7307f056c787199acfda839555921be1df13abba61e8e6db0c787ae1d0", size = 71971, upload-time = "2026-04-08T01:39:54.169Z" },
-]
-
-[[package]]
 name = "pwdlib"
 version = "0.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1129,18 +1091,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e4/47/b9efed96c114afcfa3c9d3fe98a76a1d14c74a9e266d397cf6eb64be5e01/pytest-9.1.1.tar.gz", hash = "sha256:1088fbde8f2b49d95a549a195707afa7a76a3ce9bcadc26b6d71f0ffda5fe313", size = 1636369, upload-time = "2026-06-19T10:58:32.857Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/24/25/1de2678b631f5a49215c6c96fff41ba892b0a34df68d6d80292b1b48aa7f/pytest-9.1.1-py3-none-any.whl", hash = "sha256:37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c", size = 386536, upload-time = "2026-06-19T10:58:31.347Z" },
-]
-
-[[package]]
-name = "python-dateutil"
-version = "2.9.0.post0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
 ]
 
 [[package]]
@@ -1302,15 +1252,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310, upload-time = "2023-10-24T04:13:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755, upload-time = "2023-10-24T04:13:38.866Z" },
-]
-
-[[package]]
-name = "six"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
 ]
 
 [[package]]

@@ -75,8 +75,6 @@ services:
     depends_on:
       - backend
     environment:
-      - FIRST_SUPERUSER=${FIRST_SUPERUSER:-admin@example.com}
-      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD:-changethis}
       - PLAYWRIGHT_BASE_URL=http://backend:8000
       - VITE_API_URL=http://backend:8000
       # For the reports when run locally

@@ -1,123 +1,80 @@
-# FastAPI Project - Frontend
+# Frontend
 
-The frontend is built with [Vite](https://vitejs.dev/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router), [Tailwind CSS](https://tailwindcss.com/), and [shadcn/ui](https://ui.shadcn.com/).
+The frontend is the Renewable Forecast dashboard. It presents UK wind forecast and actual generation data and provides learner/analyst views, date-range exploration, forecast revision context, and chart-based comparisons.
 
-## Requirements
+## Stack
 
-- [Bun](https://bun.sh/)
+- [Bun](https://bun.sh/) for workspace/package management and scripts
+- [Vite](https://vite.dev/) for local development and production builds
+- [React](https://react.dev/) and TypeScript
+- TanStack Query for API data fetching/caching
+- Recharts for visualizations, Tailwind CSS for styling, and shared Radix-based UI components
+- Playwright for end-to-end browser tests; Biome for linting/formatting checks
 
-## Quick Start
+## Local development
 
-From the project root, install the dependencies and start the frontend development server:
+Use the repository-root [README](../README.md#start-locally) for the full-stack startup instructions. The frontend expects the FastAPI backend to be available at `http://localhost:8000`.
+
+From the repository root, install workspace dependencies:
 
 ```bash
 bun install
+```
+
+Create `frontend/.env` (Git-ignored) with the API base URL for local development:
+
+```dotenv
+VITE_API_URL=http://localhost:8000
+```
+
+With the backend running, start Vite from `frontend/`:
+
+```bash
+cd frontend
 bun run dev
 ```
 
-Then open <http://localhost:5173/> in your browser.
+Open <http://localhost:5173>. To build the frontend, run `bun run build` from `frontend/`. In the normal deployment configuration Vite builds to `frontend/dist`; for the combined backend/Docker build it writes assets to `backend/app/frontend`, where FastAPI serves them.
 
-Run `uv run bash scripts/prestart.sh` and `uv run fastapi dev` from the `backend` directory, with PostgreSQL running in Docker Compose. See [../development.md](../development.md) for the complete setup.
+## API client
 
-To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`.
+Typed client code is generated from the backend's OpenAPI schema and lives in `src/client/`. The higher-level forecast hooks and API use are in `src/hooks/useRenewableForecast.ts` and `src/api/forecastApi.ts`.
 
-Check `frontend/package.json` to see the other available commands.
-
-## Removing the Frontend
-
-If you are developing an API-only app and want to remove the frontend, you can do it easily:
-
-* Remove the `./frontend` directory.
-
-* In the `backend/app/main.py` file, remove the `app.frontend()` call.
-
-* In the `backend/Dockerfile` file, remove the frontend build stage and the `COPY --from=frontend-build` instruction.
-
-* In the `compose.override.yml` file, remove the `playwright` service.
-
-* In the `.github/workflows/deploy.yml` file, remove the **Set up Bun**, **Install frontend dependencies**, and **Build frontend** steps.
-
-* In the `.fastapicloudignore` file, remove the `!backend/app/frontend/` entry.
-
-Done, you now have an API-only app. 🤓
-
-## Generate Client
-
-### Automatically
-
-* From the project root, run the script:
+After changing backend API request/response schemas, start the backend and regenerate the client from the repository root:
 
 ```bash
-bash ./scripts/generate-client.sh
+bash scripts/generate-client.sh
 ```
 
-* Commit the changes.
+Review the generated changes along with the backend schema change. The source OpenAPI JSON used to generate the client is not committed; the script exports it from the running application and passes it to the generator.
 
-### Manually
+## Tests and checks
 
-* Make sure the backend is running.
-
-* Download the OpenAPI JSON file from `http://localhost:8000/api/v1/openapi.json` and copy it to a new file `openapi.json` at the root of the `frontend` directory.
-
-* To generate the frontend client, run:
+Run from `frontend/`:
 
 ```bash
-bun run generate-client
+bun run lint
+bun run test
 ```
 
-* Commit the changes.
-
-Regenerate the client whenever backend changes affect the OpenAPI schema.
-
-## Using a Remote API
-
-By default, the built frontend uses the same origin as the FastAPI app. If you want to use a remote API while running the Vite development server, you can set the environment variable `VITE_API_URL` to the URL of the remote API. For example, you can set it in the `frontend/.env` file:
-
-```env
-VITE_API_URL=https://my-domain.example.com
-```
-
-Then, when you run the frontend, it will use that URL as the base URL for the API.
-
-## Code Structure
-
-The frontend code is structured as follows:
-
-* `frontend/src` - The main frontend code.
-* `frontend/public` - Static assets.
-* `frontend/src/client` - The generated OpenAPI client.
-* `frontend/src/components` - The components of the frontend, including the shadcn/ui components in `frontend/src/components/ui`.
-* `frontend/src/hooks` - Custom hooks.
-* `frontend/src/lib` - Shared frontend utilities.
-* `frontend/src/routes` - The frontend routes and pages.
-
-## End-to-End Testing with Playwright
-
-The frontend includes initial end-to-end tests using Playwright. To run the tests, you need to have the Docker Compose stack running. Start the stack with the following command:
+Playwright tests are under `tests/`. They exercise the dashboard in a browser and require the application/backend and its data to be initialized. Run the full local stack with `bun run dev` from the root before running the tests. To open Playwright's interactive UI:
 
 ```bash
-docker compose run --rm backend bash scripts/prestart.sh
-docker compose up -d --wait backend
+bun run test:ui
 ```
 
-Then, you can run the tests with the following command:
+## Frontend layout
 
-```bash
-bunx playwright test
-```
-
-You can also run your tests in UI mode to see the browser and interact with it running:
-
-```bash
-bunx playwright test --ui
-```
-
-To stop and remove the Docker Compose stack and clean the data created in tests, use the following command:
-
-```bash
-docker compose down -v
-```
-
-To update the tests, navigate to the tests directory and modify the existing test files or add new ones as needed.
-
-For more information on writing and running Playwright tests, refer to the official [Playwright documentation](https://playwright.dev/docs/intro).
+| Path | Responsibility |
+| --- | --- |
+| `src/main.tsx` | React application entry point. |
+| `src/pages/` | Dashboard page and screen-level compositions. |
+| `src/routes/` | Route-related application structure. |
+| `src/components/` | Shared application components and reusable UI primitives. |
+| `src/hooks/` | Query and application hooks. |
+| `src/api/` | API-specific adapters/helpers. |
+| `src/client/` | Generated OpenAPI client and types. |
+| `src/schemas/` | Frontend data schemas/types. |
+| `src/lib/`, `src/utils.ts` | Shared helpers. |
+| `public/` | Static public assets. |
+| `tests/` | Playwright end-to-end tests. |

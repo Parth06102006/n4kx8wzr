@@ -1,145 +1,107 @@
-# FastAPI Project - Backend
+# Backend
 
-## Requirements
+The backend is the FastAPI service for the Renewable Forecast application. It serves wind generation and forecast data, computes forecast-versus-outturn analytics, and provides the API contract consumed by the frontend.
 
-* [Docker](https://www.docker.com/).
-* [uv](https://docs.astral.sh/uv/) for Python package and environment management.
+## Stack
 
-## Local Development
+- Python 3.14+, managed with [uv](https://docs.astral.sh/uv/)
+- FastAPI and Pydantic for HTTP endpoints and response validation
+- SQLModel / SQLAlchemy and Alembic for PostgreSQL persistence and migrations
+- Psycopg 3 as the PostgreSQL driver
 
-Run the backend locally and connect it to PostgreSQL in Docker Compose.
+## Local development
 
-From the project root, start PostgreSQL:
+Use the repository-root [README](../README.md#start-locally) for the complete setup, including Docker, environment configuration, Elexon data import, and starting both frontend and backend.
 
-```console
-$ docker compose up -d db
-```
-
-Then, from `./backend/`, install the dependencies, prepare the database, and start the development server:
-
-```console
-$ uv sync
-$ uv run bash scripts/prestart.sh
-$ uv run fastapi dev
-```
-
-The API is available at `http://localhost:8000`, with automatic interactive docs at `http://localhost:8000/docs`.
-
-## General Workflow
-
-Run backend commands from `./backend/` with `uv run`. Make sure your editor uses the Python interpreter at `.venv/bin/python` in the project root.
-
-Modify or add SQLModel models for data and SQL tables in `./backend/app/models.py`, API endpoints in `./backend/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/crud.py`.
-
-## VS Code
-
-There are already configurations in place to run the backend through the VS Code debugger, so that you can use breakpoints, pause and explore variables, etc.
-
-The setup is also already configured so you can run the tests through the VS Code Python tests tab.
-
-## Full Stack with Docker Compose
-
-To run the backend and built frontend in Docker Compose:
-
-```console
-$ docker compose run --rm backend bash scripts/prestart.sh
-$ docker compose watch
-```
-
-The application is available at `http://localhost:8000`.
-
-### Docker Compose Override
-
-The `compose.override.yml` file contains local settings for published ports, source synchronization, automatic image rebuilds, and backend reloads. Docker Compose applies it automatically when you run `docker compose` without an explicit file list.
-
-To open a shell in the backend container:
-
-```console
-$ docker compose exec backend bash
-```
-
-## Backend Tests
-
-To test the backend from the `backend` directory, run:
-
-```console
-$ uv run bash scripts/test.sh
-```
-
-The tests run with Pytest. Modify existing tests or add new ones in `./backend/tests/`.
-
-If you use GitHub Actions, the tests will run automatically.
-
-### Test a Running Stack
-
-If your stack is already up and you just want to run the tests, you can use:
+For backend-only work, ensure the root `.env` has a valid `DATABASE_URL` and `FASTAPI_ENV=development`, and that PostgreSQL is running (`docker compose up -d db` from the repository root). From the repository root:
 
 ```bash
-docker compose exec backend bash scripts/tests-start.sh
+uv sync
+cd backend
+uv run bash scripts/prestart.sh
+uv run fastapi dev
 ```
 
-The `/app/backend/scripts/tests-start.sh` script calls `pytest`. If you need to pass extra arguments to `pytest`, you can pass them to that command and they will be forwarded.
+The API is served at <http://localhost:8000>. Interactive Swagger documentation is at <http://localhost:8000/docs>; the OpenAPI schema is at `/api/v1/openapi.json`.
 
-For example, to stop on first error:
+`prestart.sh` applies pending Alembic migrations and runs `app/initial_data.py`. Initialization loads January 2026 data from `data/elexon/` when present; if normalized CSVs are absent, it invokes `scripts/elexon_history_import.py` to fetch and generate them. The data directory is Git-ignored. See the root README for the importer command and data notes.
+
+## API areas
+
+API routes are composed in `app/api/main.py` and mounted by `app/main.py`.
+
+- `app/api/routes/wind.py`: actual generation, forecasts, dataset summary, and decision coverage.
+- `app/api/routes/analytics.py`: overview, forecast/actual comparisons, accuracy metrics, forecast publication versions, and CSV export.
+- `app/api/routes/utils.py`: health and utility endpoints.
+
+The analytics routes use `app/services/wind_service.py`; the wind routes use `app/crud.py`. Shared request/response and database models are defined in `app/models.py`. API responses are derived from the FastAPI OpenAPI schema and consumed by the generated frontend client.
+
+## Data initialization and migrations
+
+The Elexon importer is at `../scripts/elexon_history_import.py`. To explicitly fetch/generate source CSVs, run this from the repository root:
 
 ```bash
-docker compose exec backend bash scripts/tests-start.sh -x
+python3 scripts/elexon_history_import.py
 ```
 
-### Test Coverage
+To run database initialization manually, from `backend/`:
 
-When the tests run, they generate `htmlcov/index.html`. Open it in your browser to inspect the test coverage.
-
-## Migrations
-
-Make sure you create a revision of your models and upgrade the database with that revision every time you change them. From the `backend` directory, use `uv` to run Alembic against the PostgreSQL container:
-
-* Alembic is already configured to import your SQLModel models from `./backend/app/models.py`.
-
-* After changing a model (for example, adding a column), create a revision:
-
-```console
-$ uv run alembic revision --autogenerate -m "Add column last_name to User model"
+```bash
+uv run python app/initial_data.py
 ```
 
-* Commit to the git repository the files generated in the alembic directory.
+Check current data availability without importing:
 
-* After creating the revision, run the migration in the database (this is what will actually change the database):
-
-```console
-$ uv run alembic upgrade head
+```bash
+uv run python app/initial_data.py --check-only
 ```
 
-If you don't want to use migrations at all, uncomment the lines in the file at `./backend/app/core/db.py` that end in:
+Force a reload from CSV/API data:
 
-```python
-SQLModel.metadata.create_all(engine)
+```bash
+uv run python app/initial_data.py --force
 ```
 
-and comment the line in the file `scripts/prestart.sh` that contains:
+When changing persisted models, add and commit an Alembic revision. From `backend/`:
 
-```console
-$ alembic upgrade head
+```bash
+uv run alembic revision --autogenerate -m "Describe schema change"
+uv run alembic upgrade head
 ```
 
-If you don't want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (`.py` Python files) under `./backend/app/alembic/versions/`. And then create a first migration as described above.
+Review generated migrations before applying them; do not edit an already-applied migration to change schema history.
 
-## Email Templates
+## Tests and quality checks
 
-The email templates are written with [React Email](https://react.email) in `./packages/react-email/`. The `emails` directory holds one component per email and the `ui` directory holds the shared components (layout, heading, button, link, callout).
+Run backend tests from `backend/`:
 
-The rendered HTML in `./backend/app/email-templates/` is generated from those components. It is what the application sends and should not be edited by hand.
-
-To preview the emails while editing them, start the dev server from the root of the project:
-
-```console
-$ bun run email:dev
+```bash
+uv run bash scripts/test.sh
 ```
 
-Values coming from the backend are declared as Jinja placeholders in the component props, for example `username = "{{ username }}"`. The context for each email is built in `generate_*_email()` in `./backend/app/utils.py`, so a new placeholder needs to be added there too.
+Tests are in `tests/`, organized around API routes, CRUD, services, and initialization. Importer tests are in the repository-level `scripts/tests/` directory and can be run from the root:
 
-Once you are done, regenerate the templates used by the application:
-
-```console
-$ bun run email:export
+```bash
+uv run pytest scripts/tests
 ```
+
+If changing an API request or response, review the OpenAPI diff and regenerate the frontend client from the repository root:
+
+```bash
+bash scripts/generate-client.sh
+```
+
+## Backend layout
+
+| Path | Responsibility |
+| --- | --- |
+| `app/main.py` | FastAPI app construction, middleware, router mounting, and serving built frontend assets when available. |
+| `app/api/` | HTTP routes and dependency injection. |
+| `app/services/` | Wind forecast matching and analytics logic. |
+| `app/crud.py` | Database reads and writes. |
+| `app/models.py` | SQLModel entities and API schemas. |
+| `app/core/` | Settings and database engine configuration. |
+| `app/alembic/` | Database migration history and Alembic environment. |
+| `app/initial_data.py`, `app/wind_csv.py`, `app/init_db.py` | Data conversion, loading, migration orchestration, and validation. |
+| `tests/` | Backend unit and API tests. |
+| `scripts/` | Backend startup and test helpers. |
